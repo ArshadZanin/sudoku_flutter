@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:get/get.dart';
 import 'package:sudoku_flutter/screens/game_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -24,46 +23,10 @@ class HomePage extends StatelessWidget {
                             height: 200,
                             child: Column(
                               children: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) => const GamePage(
-                                                    difficult: 1,
-                                                  )));
-                                    },
-                                    child: Text('Beginner')),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) => const GamePage(
-                                                    difficult: 2,
-                                                  )));
-                                    },
-                                    child: Text('Easy')),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) => const GamePage(
-                                                    difficult: 3,
-                                                  )));
-                                    },
-                                    child: Text('Medium')),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) => const GamePage(
-                                                    difficult: 4,
-                                                  )));
-                                    },
-                                    child: Text('Hard')),
+                                _buildTextButton('Beginner', 1),
+                                _buildTextButton('Easy', 2),
+                                _buildTextButton('Medium', 3),
+                                _buildTextButton('Hard', 4),
                               ],
                             ),
                           ),
@@ -76,4 +39,11 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildTextButton(String text, int difficult) => TextButton(
+        onPressed: () {
+          Get.to(GamePage(difficult: difficult));
+        },
+        child: Text(text),
+      );
 }
