@@ -3,6 +3,7 @@ class SudokuCell {
   int correctText;
   int row;
   int col;
+  int team;
   bool isFocus;
   bool isCorrect;
   bool isDefault;
@@ -14,6 +15,7 @@ class SudokuCell {
     required this.correctText,
     required this.row,
     required this.col,
+    required this.team,
     required this.isFocus,
     required this.isCorrect,
     required this.isDefault,

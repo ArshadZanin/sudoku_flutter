@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sudoku_flutter/controllers/game_controller.dart';
+import 'package:sudoku_flutter/models/box_chart.dart';
 
 class GamePage extends StatefulWidget {
   final int difficult;
@@ -79,15 +80,15 @@ class _GamePageState extends State<GamePage> {
           ],
         ),
         const SizedBox(
-          width: 100,
+          width: 160,
         ),
-        InkWell(
-          onTap: () {},
-          child: const Icon(
-            Icons.workspace_premium_rounded,
-          ),
-        ),
-        InkWell(onTap: () {}, child: const Icon(Icons.pause_rounded)),
+        // InkWell(
+        //   onTap: () {},
+        //   child: const Icon(
+        //     Icons.workspace_premium_rounded,
+        //   ),
+        // ),
+        // InkWell(onTap: () {}, child: const Icon(Icons.pause_rounded)),
         InkWell(
           onTap: () => controller.showRestartDialogue('Difficulty Level'),
           child: const Icon(
@@ -95,7 +96,7 @@ class _GamePageState extends State<GamePage> {
           ),
         ),
         InkWell(
-          onTap: () {},
+          onTap: controller.onSettings,
           child: const Icon(
             Icons.settings,
           ),
@@ -160,6 +161,27 @@ class _GamePageState extends State<GamePage> {
         ),
         InkWell(
           onTap: controller.onNoteFill,
+          onLongPress: () {
+            for (var i = 0; i < 9; i++) {
+              for (var j = 0; j < 9; j++) {
+                if (!controller.sudoku[i][j].isDefault) {
+                  controller.selectedSudoku = controller.sudoku[i][j];
+                  controller.onNoteFill();
+                }
+              }
+            }
+            controller.selectedSudoku = SudokuCell(
+                text: 0,
+                correctText: 0,
+                row: 100,
+                col: 100,
+                team: 100,
+                isFocus: false,
+                isCorrect: false,
+                isDefault: false,
+                isExist: false,
+                note: []);
+          },
           child: Icon(Icons.grid_on_rounded),
         ),
         InkWell(
@@ -199,37 +221,39 @@ class _GamePageState extends State<GamePage> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(
           9,
-          (index) => InkWell(
-                onTap: () => controller.onNumberClick(index),
-                child: Container(
-                  width: 30,
-                  height: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(13),
-                    color: controller.isNote.value &&
-                            controller.selectedSudoku.row != 100 &&
-                            controller
-                                .sudoku[controller.selectedSudoku.row]
-                                    [controller.selectedSudoku.col]
-                                .note
-                                .contains(index + 1)
-                        ? Colors.grey[400]
-                        : Colors.white,
-                    border: Border.all(
-                        color: controller.isNote.value
-                            ? Colors.black
-                            : Colors.blue),
-                  ),
-                  child: Text(
-                    '${index + 1}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+          (index) => GetBuilder<GameController>(builder: (controller) {
+                return InkWell(
+                  onTap: () => controller.onNumberClick(index),
+                  child: Container(
+                    width: 30,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(13),
+                      color: controller.isNote.value &&
+                              controller.selectedSudoku.row != 100 &&
+                              controller
+                                  .sudoku[controller.selectedSudoku.row]
+                                      [controller.selectedSudoku.col]
+                                  .note
+                                  .contains(index + 1)
+                          ? Colors.grey[400]
+                          : Colors.white,
+                      border: Border.all(
+                          color: controller.isNote.value
+                              ? Colors.black
+                              : Colors.blue),
+                    ),
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-              )),
+                );
+              })),
     );
   }
 
@@ -287,9 +311,7 @@ class _GamePageState extends State<GamePage> {
     if (col == controller.selectedSudoku.col &&
         row == controller.selectedSudoku.row) {
       return Colors.grey[400];
-    } else if (row == controller.selectedSudoku.row ||
-        controller.selectedSudoku.col == controller.sudoku[row][col].col ||
-        controller.selectedSudoku.row == controller.sudoku[row][col].row) {
+    } else if (controller.isSafe(row, col)) {
       return Colors.grey[300];
     } else {
       return Colors.white;

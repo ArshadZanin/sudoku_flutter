@@ -13,6 +13,7 @@ class GameController extends GetxController {
       correctText: 0,
       row: 100,
       col: 100,
+      team: 100,
       isFocus: false,
       isCorrect: false,
       isDefault: false,
@@ -30,11 +31,32 @@ class GameController extends GetxController {
     for (var i = 0; i < 9; i++) {
       sudoku.add([]);
       for (var j = 0; j < 9; j++) {
+        int team = 0;
+        if (i < 3 && j < 3) {
+          team = 1;
+        } else if (i < 3 && j < 6) {
+          team = 2;
+        } else if (i < 3 && j < 9) {
+          team = 3;
+        } else if (i < 6 && j < 3) {
+          team = 4;
+        } else if (i < 6 && j < 6) {
+          team = 5;
+        } else if (i < 6 && j < 9) {
+          team = 6;
+        } else if (i < 9 && j < 3) {
+          team = 7;
+        } else if (i < 9 && j < 6) {
+          team = 8;
+        } else if (i < 9 && j < 9) {
+          team = 9;
+        }
         SudokuCell value = SudokuCell(
             text: boxValues[i][j],
             correctText: boxValueSolution[i][j],
             row: i,
             col: j,
+            team: team,
             isFocus: false,
             isCorrect: boxValues[i][j] == boxValueSolution[i][j],
             isDefault: boxValues[i][j] != 0,
@@ -42,6 +64,7 @@ class GameController extends GetxController {
             note: []);
         sudoku[i].add(value);
       }
+      // print(sudoku[i].map((e) => e.correctText));
     }
   }
 
@@ -75,6 +98,7 @@ class GameController extends GetxController {
     sudoku[selectedSudoku.row][selectedSudoku.col].note =
         List.generate(9, (index) => index + 1);
     selectedSudoku.note = List.generate(9, (index) => index + 1);
+    fetchSafeValues();
     update();
   }
 
@@ -84,6 +108,7 @@ class GameController extends GetxController {
     sudoku[selectedSudoku.row][selectedSudoku.col].text =
         sudoku[selectedSudoku.row][selectedSudoku.col].correctText;
     sudoku[selectedSudoku.row][selectedSudoku.col].isCorrect = true;
+    removeNoteValue(sudoku[selectedSudoku.row][selectedSudoku.col].correctText);
     isComplete();
     hints--;
   }
@@ -98,6 +123,7 @@ class GameController extends GetxController {
       } else {
         sudoku[selectedSudoku.row][selectedSudoku.col].note.add((index + 1));
       }
+      fetchSafeValues();
     } else {
       if (selectedSudoku.isCorrect) return;
       selectedSudoku.text = index + 1;
@@ -109,6 +135,8 @@ class GameController extends GetxController {
         if (mistakes == 0) {
           showRestartDialogue('Life Over!');
         }
+      } else {
+        removeNoteValue(index + 1);
       }
       isComplete();
     }
@@ -155,42 +183,55 @@ class GameController extends GetxController {
           ),
         ),
       );
-  //  showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: Center(child: Text(text)),
-  //         content: SizedBox(
-  //           height: 200,
-  //           child: Column(
-  //             children: [
-  //               TextButton(
-  //                   onPressed: () {
-  //                     controller.restart(1);
-  //                     Navigator.pop(context);
-  //                   },
-  //                   child: Text('Beginner')),
-  //               TextButton(
-  //                   onPressed: () {
-  //                     controller.restart(2);
-  //                     Navigator.pop(context);
-  //                   },
-  //                   child: Text('Easy')),
-  //               TextButton(
-  //                   onPressed: () {
-  //                     controller.restart(3);
-  //                     Navigator.pop(context);
-  //                   },
-  //                   child: Text('Medium')),
-  //               TextButton(
-  //                   onPressed: () {
-  //                     controller.restart(4);
-  //                     Navigator.pop(context);
-  //                   },
-  //                   child: Text('Hard')),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     });
+
+  bool isSafe(int row, int col) {
+    return selectedSudoku.col == sudoku[row][col].col ||
+        selectedSudoku.row == sudoku[row][col].row ||
+        selectedSudoku.team == sudoku[row][col].team;
+  }
+
+  void fetchSafeValues() {
+    List<int> safeValues = [];
+    for (var i = 0; i < 9; i++) {
+      for (var j = 0; j < 9; j++) {
+        if (selectedSudoku.row == i) {
+          safeValues.add(sudoku[i][j].text);
+        } else if (selectedSudoku.col == j) {
+          safeValues.add(sudoku[i][j].text);
+        } else if (selectedSudoku.team == sudoku[i][j].team) {
+          safeValues.add(sudoku[i][j].text);
+        }
+      }
+    }
+    safeValues.removeWhere((element) => element == 0);
+    for (var value in safeValues) {
+      sudoku[selectedSudoku.row][selectedSudoku.col].note.remove(value);
+      selectedSudoku.note.remove(value);
+    }
+  }
+
+  void removeNoteValue(int number) {
+    for (var i = 0; i < 9; i++) {
+      for (var j = 0; j < 9; j++) {
+        if (isSafe(i, j)) {
+          sudoku[i][j].note.remove(number);
+        }
+      }
+    }
+  }
+
+  void onSettings() {
+    Get.defaultDialog(
+      title: 'Settings',
+      content: SizedBox(
+        height: 150,
+        child: Center(
+          child: InkWell(
+            onTap: () => Get.offAll(HomePage()),
+            child: Text('Exit Game'),
+          ),
+        ),
+      ),
+    );
+  }
 }
