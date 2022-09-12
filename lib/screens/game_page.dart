@@ -200,7 +200,7 @@ class _GamePageState extends State<GamePage> {
       children: List.generate(
           9,
           (index) => InkWell(
-                onTap: () {},
+                onTap: () => controller.onNumberClick(index),
                 child: Container(
                   width: 30,
                   height: 40,

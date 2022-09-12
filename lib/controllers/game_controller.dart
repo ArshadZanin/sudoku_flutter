@@ -112,6 +112,7 @@ class GameController extends GetxController {
       }
       isComplete();
     }
+    update();
   }
 
   bool _unChangable() {
